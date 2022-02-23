@@ -18,6 +18,12 @@ type Celeritas struct {
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 	RootPath string
+	config   config
+}
+
+type config struct {
+	port     string
+	renderer string
 }
 
 func (c *Celeritas) New(rootPath string) error {
@@ -25,11 +31,9 @@ func (c *Celeritas) New(rootPath string) error {
 	fmt.Printf("%s (rootPath): %s\n", logSnippet, rootPath)
 
 	//////////////////////////////////////////////////////////
-	// ASSIGN APPLICATION NAME
+	// ASSIGN APPLICATION ROOT PATH
 	//////////////////////////////////////////////////////////
-	c.AppName = os.Getenv("APP_NAME")
-	fmt.Printf("%s (os.Getenv(\"APP_NAME\")): %s\n", logSnippet, os.Getenv("APP_NAME"))
-	fmt.Printf("%s (c.AppName): %s\n", logSnippet, c.AppName)
+	c.RootPath = rootPath
 
 	//////////////////////////////////////////////////////////
 	// ASSIGN APPLICATION VERSION
@@ -74,6 +78,11 @@ func (c *Celeritas) New(rootPath string) error {
 	c.ErrorLog = errorLog
 
 	//////////////////////////////////////////////////////////
+	// ASSIGN APPLICATION NAME
+	//////////////////////////////////////////////////////////
+	c.AppName = os.Getenv("APP_NAME")
+
+	//////////////////////////////////////////////////////////
 	// READ ENVIRONMENT VARIABLES AND ASSIGN VALUES TO
 	// CORRESPONDING MEMBERS OF Celeritas struct
 	//////////////////////////////////////////////////////////
@@ -82,6 +91,17 @@ func (c *Celeritas) New(rootPath string) error {
 		c.ErrorLog.Println(err)
 		return err
 	}
+
+	//////////////////////////////////////////////////////////
+	// ASSIGN CONFIGURATION FOR CELERITAS
+	//////////////////////////////////////////////////////////
+	c.config = config{
+		port:     os.Getenv("PORT"),
+		renderer: os.Getenv("RENDERER"),
+	}
+
+	c.InfoLog.Printf("%s (c.config.port): %s\n", logSnippet, c.config.port)
+	c.InfoLog.Printf("%s (c.config.renderer): %s\n", logSnippet, c.config.renderer)
 
 	return nil
 }
