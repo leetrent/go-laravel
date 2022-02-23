@@ -20,8 +20,9 @@ func initApplication() *application {
 		log.Fatal(err)
 	}
 
-	cel.AppName = "myapp"
-	cel.Debug = true
+	cel.InfoLog.Println("AppName is set to:", cel.AppName)
+	cel.InfoLog.Println("Version is set to:", cel.Version)
+	cel.InfoLog.Println("Debug is set to..:", cel.Debug)
 
 	app := &application{
 		App: cel,
