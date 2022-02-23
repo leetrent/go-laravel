@@ -1,0 +1,10 @@
+$ cd celeritas
+$ go mod init github.com/leetrent/celeritas
+
+$ cd myapp
+$ go mod init myapp
+Add the following at the bottom of myapp/go.mod:
+replace github.com/leetrent/celeritas => ../celeritas
+
+$ cd myapp
+$ go mod vendor

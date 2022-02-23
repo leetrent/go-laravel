@@ -1,0 +1,4 @@
+# github.com/leetrent/celeritas v0.0.0-00010101000000-000000000000 => ../celeritas
+## explicit; go 1.17
+github.com/leetrent/celeritas
+# github.com/leetrent/celeritas => ../celeritas
