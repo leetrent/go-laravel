@@ -117,7 +117,7 @@ func (c *Celeritas) New(rootPath string) error {
 	//////////////////////////////////////////////////////////
 	// ASSIGN TEMPLATE RENDERER
 	//////////////////////////////////////////////////////////
-	c.Render = c.createRenderer(c)
+	c.createRenderer()
 
 	return nil
 }
@@ -167,12 +167,11 @@ func (c *Celeritas) ListenAndServe() {
 	c.ErrorLog.Fatal(err)
 }
 
-func (c *Celeritas) createRenderer(cel *Celeritas) *render.Render {
+func (c *Celeritas) createRenderer() {
 	myRenderer := render.Render{
-		Renderer: cel.config.renderer,
-		RootPath: cel.RootPath,
-		Port:     cel.config.port,
+		Renderer: c.config.renderer,
+		RootPath: c.RootPath,
+		Port:     c.config.port,
 	}
-
-	return &myRenderer
+	c.Render = &myRenderer
 }
