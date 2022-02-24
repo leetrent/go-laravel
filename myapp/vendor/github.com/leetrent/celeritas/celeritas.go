@@ -3,9 +3,12 @@ package celeritas
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
 
@@ -18,6 +21,7 @@ type Celeritas struct {
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 	RootPath string
+	Routes   *chi.Mux
 	config   config
 }
 
@@ -103,6 +107,11 @@ func (c *Celeritas) New(rootPath string) error {
 	c.InfoLog.Printf("%s (c.config.port): %s\n", logSnippet, c.config.port)
 	c.InfoLog.Printf("%s (c.config.renderer): %s\n", logSnippet, c.config.renderer)
 
+	//////////////////////////////////////////////////////////
+	// ASSIGN AVAILABLE ROUTES
+	//////////////////////////////////////////////////////////
+	c.Routes = c.routes().(*chi.Mux)
+
 	return nil
 }
 
@@ -134,4 +143,19 @@ func (c *Celeritas) startLoggers() (*log.Logger, *log.Logger) {
 	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	return infoLog, errorLog
+}
+
+// ListentAndServe starts the web server
+func (c *Celeritas) ListenAndServe() {
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
+		ErrorLog:     c.ErrorLog,
+		Handler:      c.routes(),
+		IdleTimeout:  30 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 600 * time.Second,
+	}
+	c.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
+	err := srv.ListenAndServe()
+	c.ErrorLog.Fatal(err)
 }
