@@ -1,0 +1,2 @@
+$ cd <into directory where tests reside>
+$ go test .
