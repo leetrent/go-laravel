@@ -8,8 +8,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CloudyKit/jet/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"github.com/leetrent/celeritas/render"
 )
 
 const version = "1.0.0"
@@ -22,6 +24,8 @@ type Celeritas struct {
 	InfoLog  *log.Logger
 	RootPath string
 	Routes   *chi.Mux
+	Render   *render.Render
+	JetViews *jet.Set
 	config   config
 }
 
@@ -112,6 +116,20 @@ func (c *Celeritas) New(rootPath string) error {
 	//////////////////////////////////////////////////////////
 	c.Routes = c.routes().(*chi.Mux)
 
+	//////////////////////////////////////////////////////////
+	// ASSIGN JET VIEWS
+	//////////////////////////////////////////////////////////
+	var views = jet.NewSet(
+		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+		jet.InDevelopmentMode(),
+	)
+	c.JetViews = views
+
+	//////////////////////////////////////////////////////////
+	// ASSIGN TEMPLATE RENDERER
+	//////////////////////////////////////////////////////////
+	c.createRenderer()
+
 	return nil
 }
 
@@ -150,7 +168,7 @@ func (c *Celeritas) ListenAndServe() {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
 		ErrorLog:     c.ErrorLog,
-		Handler:      c.routes(),
+		Handler:      c.Routes,
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
@@ -158,4 +176,14 @@ func (c *Celeritas) ListenAndServe() {
 	c.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
 	err := srv.ListenAndServe()
 	c.ErrorLog.Fatal(err)
+}
+
+func (c *Celeritas) createRenderer() {
+	myRenderer := render.Render{
+		Renderer: c.config.renderer,
+		RootPath: c.RootPath,
+		Port:     c.config.port,
+		JetViews: c.JetViews,
+	}
+	c.Render = &myRenderer
 }
