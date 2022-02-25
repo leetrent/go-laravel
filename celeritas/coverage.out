@@ -1,0 +1,22 @@
+mode: set
+github.com/leetrent/celeritas/render/render.go:35.111,36.37 1 1
+github.com/leetrent/celeritas/render/render.go:42.2,42.52 1 1
+github.com/leetrent/celeritas/render/render.go:37.12,38.36 1 1
+github.com/leetrent/celeritas/render/render.go:39.13,40.48 1 1
+github.com/leetrent/celeritas/render/render.go:46.102,48.16 2 1
+github.com/leetrent/celeritas/render/render.go:53.2,54.17 2 1
+github.com/leetrent/celeritas/render/render.go:58.2,59.16 2 1
+github.com/leetrent/celeritas/render/render.go:64.2,64.12 1 1
+github.com/leetrent/celeritas/render/render.go:48.16,51.3 2 1
+github.com/leetrent/celeritas/render/render.go:54.17,56.3 1 0
+github.com/leetrent/celeritas/render/render.go:59.16,62.3 2 0
+github.com/leetrent/celeritas/render/render.go:68.122,71.22 2 1
+github.com/leetrent/celeritas/render/render.go:77.2,78.17 2 1
+github.com/leetrent/celeritas/render/render.go:82.2,83.16 2 1
+github.com/leetrent/celeritas/render/render.go:88.2,88.46 1 1
+github.com/leetrent/celeritas/render/render.go:93.2,93.12 1 1
+github.com/leetrent/celeritas/render/render.go:71.22,73.3 1 1
+github.com/leetrent/celeritas/render/render.go:73.8,75.3 1 0
+github.com/leetrent/celeritas/render/render.go:78.17,80.3 1 0
+github.com/leetrent/celeritas/render/render.go:83.16,86.3 2 1
+github.com/leetrent/celeritas/render/render.go:88.46,91.3 2 0

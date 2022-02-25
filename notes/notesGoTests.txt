@@ -1,2 +1,11 @@
+# Run tests:
 $ cd <into directory where tests reside>
 $ go test .
+# Verbose test:
+$ go test -v .
+
+# Report test coverage:
+$ go test -cover .
+
+
+
