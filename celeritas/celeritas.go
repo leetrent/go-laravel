@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CloudyKit/jet/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/leetrent/celeritas/render"
@@ -24,6 +25,7 @@ type Celeritas struct {
 	RootPath string
 	Routes   *chi.Mux
 	Render   *render.Render
+	JetViews *jet.Set
 	config   config
 }
 
@@ -115,6 +117,15 @@ func (c *Celeritas) New(rootPath string) error {
 	c.Routes = c.routes().(*chi.Mux)
 
 	//////////////////////////////////////////////////////////
+	// ASSIGN JET VIEWS
+	//////////////////////////////////////////////////////////
+	var views = jet.NewSet(
+		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+		jet.InDevelopmentMode(),
+	)
+	c.JetViews = views
+
+	//////////////////////////////////////////////////////////
 	// ASSIGN TEMPLATE RENDERER
 	//////////////////////////////////////////////////////////
 	c.createRenderer()
@@ -172,6 +183,7 @@ func (c *Celeritas) createRenderer() {
 		Renderer: c.config.renderer,
 		RootPath: c.RootPath,
 		Port:     c.config.port,
+		JetViews: c.JetViews,
 	}
 	c.Render = &myRenderer
 }
