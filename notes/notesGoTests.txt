@@ -5,6 +5,7 @@ $ go test .
 $ go test -v .
 
 # Report test coverage:
+$ cd <root level of project>
 $ go test -cover .
 
 
