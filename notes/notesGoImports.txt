@@ -9,3 +9,9 @@ https://github.com/CloudyKit/jet
 cd celeritas
 $ go get github.com/CloudyKit/jet/v6
 
+# Http Session Management:
+https://github.com/alexedwards/scs
+
+
+
+

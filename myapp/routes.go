@@ -15,9 +15,9 @@ func (a *application) routes() *chi.Mux {
 	// ADD ROUTES HERE
 	//////////////////////////////////////////
 	a.App.Routes.Get("/", a.Handlers.Home)
-	// a.App.Routes.Get("/jet", func(w http.ResponseWriter, r *http.Request) {
-	// 	a.App.Render.JetPage(w, r, "testjet", nil, nil)
-	// })
+	a.App.Routes.Get("/go-page", a.Handlers.GoPage)
+	a.App.Routes.Get("/jet-page", a.Handlers.JetPage)
+	a.App.Routes.Get("/sessions", a.Handlers.SessionTest)
 
 	//////////////////////////////////////////
 	// STATIC ROUTES HERE
