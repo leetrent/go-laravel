@@ -136,6 +136,10 @@ func (c *Celeritas) New(rootPath string) error {
 			domain:   os.Getenv("COOKIE_DOMAIN"),
 		},
 		sessionType: os.Getenv("SESSION_TYPE"),
+		database: databaseConfig{
+			database: os.Getenv("DATABASE_TYPE"),
+			dsn:      c.BuildSDN(),
+		},
 	}
 
 	//c.InfoLog.Printf("%s (c.config.port): %s\n", logSnippet, c.config.port)
@@ -233,8 +237,8 @@ func (c *Celeritas) createRenderer() {
 func (c *Celeritas) BuildSDN() string {
 	var dsn string
 
-	databaseType := os.Getenv("DATABASE_TYPE")
-	c.InfoLog.Printf("[celeritas][BuildDSN]: (databaseType): '%s';", databaseType)
+	//databaseType := os.Getenv("DATABASE_TYPE")
+	//c.InfoLog.Printf("[celeritas][BuildDSN]: (databaseType): '%s';", databaseType)
 
 	switch os.Getenv("DATABASE_TYPE") {
 	case "postgres", "postgresql":
@@ -252,6 +256,6 @@ func (c *Celeritas) BuildSDN() string {
 	default:
 	}
 
-	c.InfoLog.Printf("[celeritas][BuildDSN]: (dsn): %s", dsn)
+	//c.InfoLog.Printf("[celeritas][BuildDSN]: (dsn): %s", dsn)
 	return dsn
 }
