@@ -1,0 +1,17 @@
+$ docker-compose up
+
+# Run in background:
+$ docker-compose up -d
+
+# Shutdown:
+$ docker-compose down
+
+# PostgreSQL:
+Host....:localhost
+User....: postgres
+Password: password
+Database: celeritas
+
+
+
+
