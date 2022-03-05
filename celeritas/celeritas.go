@@ -28,6 +28,7 @@ type Celeritas struct {
 	Routes   *chi.Mux
 	Render   *render.Render
 	Session  *scs.SessionManager
+	DB       Database
 	JetViews *jet.Set
 	config   config
 }
@@ -37,11 +38,12 @@ type config struct {
 	renderer    string
 	cookie      cookieConfig
 	sessionType string
+	database    databaseConfig
 }
 
 func (c *Celeritas) New(rootPath string) error {
-	logSnippet := "\n[celeritas][New] =>"
-	fmt.Printf("%s (rootPath): %s\n", logSnippet, rootPath)
+	//logSnippet := "\n[celeritas][New] =>"
+	//fmt.Printf("%s (rootPath): %s\n", logSnippet, rootPath)
 
 	//////////////////////////////////////////////////////////
 	// ASSIGN APPLICATION ROOT PATH
@@ -91,6 +93,21 @@ func (c *Celeritas) New(rootPath string) error {
 	c.ErrorLog = errorLog
 
 	//////////////////////////////////////////////////////////
+	// CONNECT TO DATABASE
+	//////////////////////////////////////////////////////////
+	if os.Getenv("DATABASE_TYPE") != "" {
+		db, err := c.OpenDB(os.Getenv("DATABASE_TYPE"), c.BuildSDN())
+		if err != nil {
+			c.ErrorLog.Println(err)
+			os.Exit(1)
+		}
+		c.DB = Database{
+			DataType: os.Getenv("DATABASE_TYPE"),
+			Pool:     db,
+		}
+	}
+
+	//////////////////////////////////////////////////////////
 	// ASSIGN APPLICATION NAME
 	//////////////////////////////////////////////////////////
 	c.AppName = os.Getenv("APP_NAME")
@@ -119,10 +136,14 @@ func (c *Celeritas) New(rootPath string) error {
 			domain:   os.Getenv("COOKIE_DOMAIN"),
 		},
 		sessionType: os.Getenv("SESSION_TYPE"),
+		database: databaseConfig{
+			database: os.Getenv("DATABASE_TYPE"),
+			dsn:      c.BuildSDN(),
+		},
 	}
 
-	c.InfoLog.Printf("%s (c.config.port): %s\n", logSnippet, c.config.port)
-	c.InfoLog.Printf("%s (c.config.renderer): %s\n", logSnippet, c.config.renderer)
+	//c.InfoLog.Printf("%s (c.config.port): %s\n", logSnippet, c.config.port)
+	//c.InfoLog.Printf("%s (c.config.renderer): %s\n", logSnippet, c.config.renderer)
 
 	//////////////////////////////////////////////////////////
 	// CREATE HTTP SESSION
@@ -198,6 +219,12 @@ func (c *Celeritas) ListenAndServe() {
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
 	}
+
+	/////////////////////////////////////////////
+	// CLOSE DATABASE WHEN APPLICTION SHUTS DOWN
+	/////////////////////////////////////////////
+	defer c.DB.Pool.Close()
+
 	c.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
 	err := srv.ListenAndServe()
 	c.ErrorLog.Fatal(err)
@@ -211,4 +238,30 @@ func (c *Celeritas) createRenderer() {
 		JetViews: c.JetViews,
 	}
 	c.Render = &myRenderer
+}
+
+func (c *Celeritas) BuildSDN() string {
+	var dsn string
+
+	//databaseType := os.Getenv("DATABASE_TYPE")
+	//c.InfoLog.Printf("[celeritas][BuildDSN]: (databaseType): '%s';", databaseType)
+
+	switch os.Getenv("DATABASE_TYPE") {
+	case "postgres", "postgresql":
+		dsn = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=%s timezone=UTC connect_timeout=5",
+			os.Getenv("DATABASE_HOST"),
+			os.Getenv("DATABASE_PORT"),
+			os.Getenv("DATABASE_USER"),
+			os.Getenv("DATABASE_NAME"),
+			os.Getenv("DATABASE_SSL_MODE"))
+
+		if os.Getenv("DATABASE_PASS") != "" {
+			dsn = fmt.Sprintf("%s password=%s", dsn, os.Getenv("DATABASE_PASS"))
+		}
+
+	default:
+	}
+
+	//c.InfoLog.Printf("[celeritas][BuildDSN]: (dsn): %s", dsn)
+	return dsn
 }

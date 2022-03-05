@@ -1,0 +1,11 @@
+https://github.com/jackc/pgx
+
+# Install low-level PostgreSQL database driver:
+$ go get github.com/jackc/pgconn
+
+# Install pure Go driver and toolkit for PostgreSQL:
+$ go get github.com/jackc/pgx/v4
+
+# Install database/sql compatibility layer for pgx:
+$ go get github.com/jackc/pgx/v4/stdlib
+
