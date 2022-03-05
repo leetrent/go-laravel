@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -23,20 +22,20 @@ func (a *application) routes() *chi.Mux {
 	//////////////////////////////////////////
 	// TEST DATABASE
 	//////////////////////////////////////////
-	a.App.Routes.Get("/test-database", func(w http.ResponseWriter, r *http.Request) {
-		query := "SELECT id, first_name FROM users WHERE id = 1"
-		row := a.App.DB.Pool.QueryRowContext(r.Context(), query)
+	// a.App.Routes.Get("/test-database", func(w http.ResponseWriter, r *http.Request) {
+	// 	query := "SELECT id, first_name FROM users WHERE id = 1"
+	// 	row := a.App.DB.Pool.QueryRowContext(r.Context(), query)
 
-		var id int
-		var name string
-		err := row.Scan(&id, &name)
-		if err != nil {
-			a.App.ErrorLog.Println(err)
-			return
-		}
+	// 	var id int
+	// 	var name string
+	// 	err := row.Scan(&id, &name)
+	// 	if err != nil {
+	// 		a.App.ErrorLog.Println(err)
+	// 		return
+	// 	}
 
-		fmt.Fprintf(w, "id: '%d', name='%s'", id, name)
-	})
+	// 	fmt.Fprintf(w, "id: '%d', name='%s'", id, name)
+	// })
 
 	//////////////////////////////////////////
 	// STATIC ROUTES HERE
