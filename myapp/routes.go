@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"myapp/data"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -36,6 +38,22 @@ func (a *application) routes() *chi.Mux {
 
 	// 	fmt.Fprintf(w, "id: '%d', name='%s'", id, name)
 	// })
+
+	a.App.Routes.Get("/create-user", func(w http.ResponseWriter, r *http.Request) {
+		u := data.User{
+			FirstName: "Casey Boy",
+			LastName:  "Trent",
+			Email:     "casey@casey.com",
+			Active:    1,
+			Password:  "password",
+		}
+		id, err := a.Models.Users.Insert(u)
+		if err != nil {
+			a.App.ErrorLog.Println(err)
+			return
+		}
+		fmt.Fprintf(w, "id: '%d', name: '%s'", id, u.FirstName)
+	})
 
 	//////////////////////////////////////////
 	// STATIC ROUTES HERE
