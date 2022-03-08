@@ -21,6 +21,8 @@ func (a *application) routes() *chi.Mux {
 	a.App.Routes.Get("/go-page", a.Handlers.GoPage)
 	a.App.Routes.Get("/jet-page", a.Handlers.JetPage)
 	a.App.Routes.Get("/sessions", a.Handlers.SessionTest)
+	a.App.Routes.Get("/users/login", a.Handlers.UserLogin)
+	//a.App.Routes.Post("/users/login", a.Handlers.PostUserLogin)
 
 	//////////////////////////////////////////
 	// TEST DATABASE
