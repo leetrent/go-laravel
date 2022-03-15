@@ -219,6 +219,12 @@ func (c *Celeritas) ListenAndServe() {
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
 	}
+
+	/////////////////////////////////////////////
+	// CLOSE DATABASE WHEN APPLICTION SHUTS DOWN
+	/////////////////////////////////////////////
+	defer c.DB.Pool.Close()
+
 	c.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
 	err := srv.ListenAndServe()
 	c.ErrorLog.Fatal(err)
