@@ -1,0 +1,10 @@
+# https://upper.io/v4/
+
+$ go get -u github.com/upper/db/v4/adapter/{$ADAPTER}
+
+# Remove '-u', use postgresql:
+$ go get github.com/upper/db/v4/adapter/postgresql
+
+# Remove '-u', use mysql
+$ go get github.com/upper/db/v4/adapter/mysql
+
