@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"myapp/data"
 	"myapp/handlers"
 	"os"
 
@@ -21,6 +22,8 @@ func initApplication() *application {
 		log.Fatal(err)
 	}
 
+	cel.AppName = "myapp"
+
 	// cel.InfoLog.Println("AppName is set to:", cel.AppName)
 	// cel.InfoLog.Println("Version is set to:", cel.Version)
 	// cel.InfoLog.Println("Debug is set to..:", cel.Debug)
@@ -35,6 +38,8 @@ func initApplication() *application {
 	}
 
 	app.App.Routes = app.routes()
+
+	app.Models = data.New(app.App.DB.Pool)
 
 	return app
 }

@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 
 	db2 "github.com/upper/db/v4"
@@ -15,8 +16,8 @@ var upper db2.Session
 type Models struct {
 	// Any models inserted here (and in the New function)
 	// are easily accessible throughout the entire application
-	// Users  User
-	// Tokens Token
+	Users  User
+	Tokens Token
 }
 
 func New(databasePool *sql.DB) Models {
@@ -29,15 +30,15 @@ func New(databasePool *sql.DB) Models {
 	}
 
 	return Models{
-		Users: User{},
-		// Tokens: Token{},
+		Users:  User{},
+		Tokens: Token{},
 	}
 }
 
-// func getInsertID(i db2.ID) int {
-// 	idType := fmt.Sprintf("%T", i)
-// 	if idType == "int64" {
-// 		return int(i.(int64))
-// 	}
-// 	return i.(int)
-// }
+func getInsertID(i db2.ID) int {
+	idType := fmt.Sprintf("%T", i)
+	if idType == "int64" {
+		return int(i.(int64))
+	}
+	return i.(int)
+}
