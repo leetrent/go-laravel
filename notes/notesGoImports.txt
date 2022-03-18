@@ -12,6 +12,10 @@ $ go get github.com/CloudyKit/jet/v6
 # Http Session Management:
 https://github.com/alexedwards/scs
 
+# Mock database for unit tests:
+https://github.com/DATA-DOG/go-sqlmock
+$ go get github.com/DATA-DOG/go-sqlmock
+
 
 
 
