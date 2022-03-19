@@ -16,6 +16,14 @@ https://github.com/alexedwards/scs
 https://github.com/DATA-DOG/go-sqlmock
 $ go get github.com/DATA-DOG/go-sqlmock
 
+# Using Docker for Integration Tests:
+https://github.com/ory/dockertest/v3
+$ go get -u github.com/ory/dockertest/v3
+$ go get -u github.com/ory/dockertest/v3/docker
+$ go get github.com/ory/dockertest/v3
+$ go get github.com/ory/dockertest/v3/docker
+
+
 
 
 
