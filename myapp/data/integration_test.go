@@ -2,6 +2,8 @@
 
 // run tests with this command: go test . --tags integration --count=1
 // go test -cover . --tags integration
+// go test -coverprofile=coverage.out . -- tags integration
+// go tool cover -html=coverage.out
 
 package data
 
@@ -11,6 +13,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
@@ -300,7 +303,7 @@ func TestUser_ResetPassword(t *testing.T) {
 func TestUser_Delete(t *testing.T) {
 	err := models.Users.Delete(1)
 	if err != nil {
-		t.Error("failed to delete user: " , err)
+		t.Error("failed to delete user: ", err)
 	}
 
 	_, err = models.Users.GetByID(1)
@@ -313,16 +316,96 @@ func TestUser_Delete(t *testing.T) {
 // TEST USERS TABLE FUNCTIONALITY
 /////////////////////////////////////////////////////////////////////
 
-// func TestToken_Table(t *testing.T) {
-// 	s := models.Tokens.Table()
-// 	if s != "tokens" {
-// 		t.Error("wrong table returned (expected 'tokens')")
-// 	}
-// }
+func TestToken_Table(t *testing.T) {
+	s := models.Tokens.Table()
+	if s != "tokens" {
+		t.Error("wrong table returned (expected 'tokens')")
+	}
+}
 
-// func TestToken_GenerateToken(t *testing.T) {
-// 	id, err := models.Users.Insert(dummyUser)
-// 	if err != nil {
-// 		t.Error("error inserting user: ", err)
-// 	}
-// }
+func TestToken_GenerateToken(t *testing.T) {
+	id, err := models.Users.Insert(dummyUser)
+	if err != nil {
+		t.Error("[TestToken_GenerateToken] => error inserting dummyUser: ", err)
+	}
+
+	_, err = models.Tokens.GenerateToken(id, time.Hour*24*365)
+	if err != nil {
+		t.Error("[TestToken_GenerateToken] => error generating token: ", err)
+	}
+}
+
+func TestToken_Insert(t *testing.T) {
+	u, err := models.Users.GetByEmail(dummyUser.Email)
+	if err != nil {
+		t.Error("[TestToken_Insert] => error getting user by email (dummyUser.Email): ", err)
+	}
+
+	token, err := models.Tokens.GenerateToken(u.ID, time.Hour*24*365)
+	if err != nil {
+		t.Error("[TestToken_Insert] => error generating token: ", err)
+	}
+
+	err = models.Tokens.Insert(*token, *u)
+	if err != nil {
+		t.Error("[TestToken_Insert] => error inserting token in table: ", err)
+	}
+}
+
+func TestToken_GetUserForToken(t *testing.T) {
+	token := "abc"
+	_, err := models.Tokens.GetUserForToken(token)
+	if err == nil {
+		t.Error("[TestToken_GetUserForToken ] => error expected but not received when getting user with a bad token.")
+	}
+
+	u, err := models.Users.GetByEmail(dummyUser.Email)
+	if err != nil {
+		t.Error("[TestToken_GetUserForToken] => error getting user by email (dummyUser.Email): ", err)
+	}
+
+	_, err = models.Tokens.GetUserForToken(u.Token.PlainText)
+	if err != nil {
+		t.Error("[TestToken_GetUserForToken] => failed to get user with a valid token")
+	}
+}
+
+func TestToken_GetTokensForUser(t *testing.T) {
+	tokens, err := models.Tokens.GetTokensForUser(1)
+	if err != nil {
+		t.Error("[TestToken_GetTokensForUser] => failed to get tokens for user")
+	}
+
+	if len(tokens) > 0 {
+		t.Error("[TestToken_GetTokensForUser] => tokens returned for non-existent user")
+	}
+}
+
+func TestToken_Get(t *testing.T) {
+	u, err := models.Users.GetByEmail(dummyUser.Email)
+	if err != nil {
+		t.Error("failed to get user")
+	}
+
+	_, err = models.Tokens.Get(u.Token.ID)
+	if err != nil {
+		t.Error("error getting token by id: ", err)
+	}
+}
+
+func TestToken_GetByToken(t *testing.T) {
+	u, err := models.Users.GetByEmail(dummyUser.Email)
+	if err != nil {
+		t.Error("failed to get user")
+	}
+
+	_, err = models.Tokens.GetByToken(u.Token.PlainText)
+	if err != nil {
+		t.Error("error getting token by token: ", err)
+	}
+
+	_, err = models.Tokens.GetByToken("123")
+	if err == nil {
+		t.Error("no error getting non-existing token by token: ", err)
+	}
+}
