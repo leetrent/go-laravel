@@ -114,6 +114,8 @@ func TestMain(m *testing.M) {
 }
 
 func createTables(db *sql.DB) error {
+	log.Println("[createTable] => (BEGIN)")
+
 	stmt := `
        CREATE OR REPLACE FUNCTION trigger_set_timestamp()
     RETURNS TRIGGER AS $$
@@ -180,8 +182,14 @@ func createTables(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+
+	log.Println("[createTable] => (END, returning nil)")
 	return nil
 }
+
+/////////////////////////////////////////////////////////////////////
+// TEST USERS TABLE FUNCTIONALITY
+/////////////////////////////////////////////////////////////////////
 
 func TestUser_Table(t *testing.T) {
 	s := models.Users.Table()
@@ -251,3 +259,70 @@ func TestUser_Update(t *testing.T) {
 		t.Error("last name not updated in database")
 	}
 }
+
+func TestUser_PasswordMatches(t *testing.T) {
+	u, err := models.Users.GetByID(1)
+	if err != nil {
+		t.Error("[password matches] => user with an ID of 1 was not found: ", err)
+	}
+
+	matches, err := u.PasswordMatches("password")
+	if err != nil {
+		t.Error("[password matches] => error encountered when calling user.PasswordMatches: ", err)
+	}
+
+	if !matches {
+		t.Error("password doesn't match when it should.")
+	}
+
+	matches, err = u.PasswordMatches("123")
+	if err != nil {
+		t.Error("[password matches] => error encountered when calling user.PasswordMatches: ", err)
+	}
+
+	if !matches {
+		t.Error("password matches when it should not.")
+	}
+}
+
+func TestUser_ResetPassword(t *testing.T) {
+	err := models.Users.ResetPassword(1, "new_password")
+	if err != nil {
+		t.Error("error resetting password: ", err)
+	}
+
+	err = models.Users.ResetPassword(2, "new_password")
+	if err == nil {
+		t.Error("did not get an error when trying to reset password for non-existent user")
+	}
+}
+
+func TestUser_Delete(t *testing.T) {
+	err := models.Users.Delete(1)
+	if err != nil {
+		t.Error("failed to delete user: " , err)
+	}
+
+	_, err = models.Users.GetByID(1)
+	if err == nil {
+		t.Error("retrieved user who was supposed to be deleted")
+	}
+}
+
+/////////////////////////////////////////////////////////////////////
+// TEST USERS TABLE FUNCTIONALITY
+/////////////////////////////////////////////////////////////////////
+
+// func TestToken_Table(t *testing.T) {
+// 	s := models.Tokens.Table()
+// 	if s != "tokens" {
+// 		t.Error("wrong table returned (expected 'tokens')")
+// 	}
+// }
+
+// func TestToken_GenerateToken(t *testing.T) {
+// 	id, err := models.Users.Insert(dummyUser)
+// 	if err != nil {
+// 		t.Error("error inserting user: ", err)
+// 	}
+// }
