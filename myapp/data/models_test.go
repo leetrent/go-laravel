@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	db2 "github.com/upper/db/v4"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	db2 "github.com/upper/db/v4"
 )
 
 func TestNew(t *testing.T) {
@@ -40,4 +40,5 @@ func TestGetInsertID(t *testing.T) {
 	if fmt.Sprintf("%T", returnedID) != "int" {
 		t.Error("wrong type returned")
 	}
+
 }

@@ -1,11 +1,10 @@
 package data
 
 import (
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
 	"errors"
-	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -37,7 +36,6 @@ func (t *Token) GetUserForToken(token string) (*User, error) {
 	res := collection.Find(up.Cond{"token": token})
 	err := res.One(&theToken)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -45,9 +43,9 @@ func (t *Token) GetUserForToken(token string) (*User, error) {
 	res = collection.Find(up.Cond{"id": theToken.UserID})
 	err = res.One(&u)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
+
 	u.Token = theToken
 
 	return &u, nil
@@ -59,7 +57,6 @@ func (t *Token) GetTokensForUser(id int) ([]*Token, error) {
 	res := collection.Find(up.Cond{"user_id": id})
 	err := res.All(&tokens)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -69,10 +66,9 @@ func (t *Token) GetTokensForUser(id int) ([]*Token, error) {
 func (t *Token) Get(id int) (*Token, error) {
 	var token Token
 	collection := upper.Collection(t.Table())
-	res := collection.Find(up.Cond{"id": id})
+	res := collection.Find(up.Cond{"id":id})
 	err := res.One(&token)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -85,7 +81,6 @@ func (t *Token) GetByToken(plainText string) (*Token, error) {
 	res := collection.Find(up.Cond{"token": plainText})
 	err := res.One(&token)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -94,10 +89,9 @@ func (t *Token) GetByToken(plainText string) (*Token, error) {
 
 func (t *Token) Delete(id int) error {
 	collection := upper.Collection(t.Table())
-	res := collection.Find(id) // primary key
+	res := collection.Find(id)
 	err := res.Delete()
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -109,7 +103,6 @@ func (t *Token) DeleteByToken(plainText string) error {
 	res := collection.Find(up.Cond{"token": plainText})
 	err := res.Delete()
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -119,19 +112,13 @@ func (t *Token) DeleteByToken(plainText string) error {
 func (t *Token) Insert(token Token, u User) error {
 	collection := upper.Collection(t.Table())
 
-	////////////////////////////////////////////////
-	// DELETE EXISTING TOKENS (if any):
-	////////////////////////////////////////////////
+	// delete existing tokens
 	res := collection.Find(up.Cond{"user_id": u.ID})
 	err := res.Delete()
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
-	////////////////////////////////////////////////
-	// INSERT NEW TOKEN:
-	////////////////////////////////////////////////
 	token.CreatedAt = time.Now()
 	token.UpdatedAt = time.Now()
 	token.FirstName = u.FirstName
@@ -139,7 +126,6 @@ func (t *Token) Insert(token Token, u User) error {
 
 	_, err = collection.Insert(token)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -148,14 +134,13 @@ func (t *Token) Insert(token Token, u User) error {
 
 func (t *Token) GenerateToken(userID int, ttl time.Duration) (*Token, error) {
 	token := &Token{
-		UserID:  userID,
+		UserID: userID,
 		Expires: time.Now().Add(ttl),
 	}
 
 	randomBytes := make([]byte, 16)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -167,19 +152,20 @@ func (t *Token) GenerateToken(userID int, ttl time.Duration) (*Token, error) {
 }
 
 func (t *Token) AuthenticateToken(r *http.Request) (*User, error) {
-	authorizatonHeader := r.Header.Get("Authorization")
-	if authorizatonHeader == "" {
+	authorizationHeader := r.Header.Get("Authorization")
+	if authorizationHeader == "" {
 		return nil, errors.New("no authorization header received")
 	}
 
-	headerParts := strings.Split(authorizatonHeader, " ")
+	headerParts := strings.Split(authorizationHeader, " ")
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
 		return nil, errors.New("no authorization header received")
 	}
 
 	token := headerParts[1]
+
 	if len(token) != 26 {
-		return nil, errors.New("token is an incorrect length")
+		return nil, errors.New("token wrong size")
 	}
 
 	tkn, err := t.GetByToken(token)

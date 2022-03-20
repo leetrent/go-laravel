@@ -13,32 +13,36 @@ import (
 var db *sql.DB
 var upper db2.Session
 
+// Models is the wrapper for all database models
 type Models struct {
-	// Any models inserted here (and in the New function)
+	// any models inserted here (and in the New function)
 	// are easily accessible throughout the entire application
-	Users  User
+	Users User
 	Tokens Token
 }
 
+// New initializes the models package for use
 func New(databasePool *sql.DB) Models {
 	db = databasePool
 
-	if os.Getenv("DATABASE_TYPE") == "mysql" || os.Getenv("DATABASE") == "mariadb" {
+	if os.Getenv("DATABASE_TYPE") == "mysql" || os.Getenv("DATABASE_TYPE") == "mariadb" {
 		upper, _ = mysql.New(databasePool)
 	} else {
 		upper, _ = postgresql.New(databasePool)
 	}
 
 	return Models{
-		Users:  User{},
+		Users: User{},
 		Tokens: Token{},
 	}
 }
 
+// getInsertID returns the integer value of a newly inserted id (using upper)
 func getInsertID(i db2.ID) int {
 	idType := fmt.Sprintf("%T", i)
 	if idType == "int64" {
 		return int(i.(int64))
 	}
+
 	return i.(int)
 }
