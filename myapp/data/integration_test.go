@@ -1,9 +1,6 @@
-//go:build integration
+// go:build integration
 
 // run tests with this command: go test . --tags integration --count=1
-// go test -cover . --tags integration
-// go test -coverprofile=coverage.out . -- tags integration
-// go tool cover -html=coverage.out
 
 package data
 
@@ -16,28 +13,29 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
 )
 
+
 var (
-	host     = "localhost"
-	user     = "postgres"
+	host = "localhost"
+	user = "postgres"
 	password = "secret"
-	dbName   = "celeritas_test"
-	port     = "5435"
-	dsn      = "host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=5"
+	dbName = "celeritas_test"
+	port = "5435"
+	dsn = "host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=5"
 )
 
 var dummyUser = User{
 	FirstName: "Some",
-	LastName:  "Guy",
-	Email:     "me@here.com",
-	Active:    1,
-	Password:  "password",
+	LastName: "Guy",
+	Email: "me@here.com",
+	Active: 1,
+	Password: "password",
 }
 
 var models Models
@@ -45,26 +43,21 @@ var testDB *sql.DB
 var resource *dockertest.Resource
 var pool *dockertest.Pool
 
-func TestMain(m *testing.M) {
+
+func TestMain(m *testing.M){
 	os.Setenv("DATABASE_TYPE", "postgres")
+	os.Setenv("UPPER_DB_LOG", "ERROR")
 
 	p, err := dockertest.NewPool("")
 	if err != nil {
-		log.Fatalf("ERROR(dockertest.NewPool): %s", err)
+		log.Fatalf("could not connect to docker: %s", err)
 	}
 
 	pool = p
 
-	log.Println("pool....:", pool)
-	log.Println("p.......:", p)
-	log.Println("user....:", user)
-	log.Println("password:", password)
-	log.Println("dbName..:", dbName)
-	log.Println("port....:", port)
-
 	opts := dockertest.RunOptions{
 		Repository: "postgres",
-		Tag:        "13.4",
+		Tag: "13.4",
 		Env: []string{
 			"POSTGRES_USER=" + user,
 			"POSTGRES_PASSWORD=" + password,
@@ -77,128 +70,116 @@ func TestMain(m *testing.M) {
 			},
 		},
 	}
-	log.Println("opts:", opts)
 
 	resource, err = pool.RunWithOptions(&opts)
-	log.Println("resource:", resource)
 	if err != nil {
-		if resource != nil {
-			_ = pool.Purge(resource)
-		}
-		log.Fatalf("ERROR(pool.RunWithOptions): %s", err)
+		_ = pool.Purge(resource)
+		log.Fatalf("could not start resource: %s", err)
 	}
 
 	if err := pool.Retry(func() error {
 		var err error
 		testDB, err = sql.Open("pgx", fmt.Sprintf(dsn, host, port, user, password, dbName))
 		if err != nil {
-			log.Println("ERROR(sql.Open):", err)
+			log.Println("Error:", err)
 			return err
 		}
 		return testDB.Ping()
 	}); err != nil {
 		_ = pool.Purge(resource)
-		log.Fatalf("Error(pool.Retry): %s", err)
+		log.Fatalf("could not connect to docker: %s", err)
 	}
 
 	err = createTables(testDB)
 	if err != nil {
-		log.Println("ERROR(createTables):", err)
+		log.Fatalf("error creating tables: %s", err)
 	}
 
 	models = New(testDB)
 
 	code := m.Run()
 
-	// if err := pool.Purge(resource); err != nil {
-	// 	log.Fatalf("could not purge resource: %s", err)
-	// }
+	if err := pool.Purge(resource); err != nil {
+		log.Fatalf("could not purge resource: %s", err)
+	}
 
 	os.Exit(code)
 }
 
 func createTables(db *sql.DB) error {
-	log.Println("[createTable] => (BEGIN)")
-
 	stmt := `
-       CREATE OR REPLACE FUNCTION trigger_set_timestamp()
-    RETURNS TRIGGER AS $$
-    BEGIN
-      NEW.updated_at = NOW();
-      RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql;
-     
-    drop table if exists users cascade;
-     
-    CREATE TABLE users (
-        id SERIAL PRIMARY KEY,
-        first_name character varying(255) NOT NULL,
-        last_name character varying(255) NOT NULL,
-        user_active integer NOT NULL DEFAULT 0,
-        email character varying(255) NOT NULL UNIQUE,
-        password character varying(60) NOT NULL,
-        created_at timestamp without time zone NOT NULL DEFAULT now(),
-        updated_at timestamp without time zone NOT NULL DEFAULT now()
-    );
-     
-    CREATE TRIGGER set_timestamp
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE PROCEDURE trigger_set_timestamp();
-     
-    drop table if exists remember_tokens;
-     
-    CREATE TABLE remember_tokens (
-        id SERIAL PRIMARY KEY,
-        user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        remember_token character varying(100) NOT NULL,
-        created_at timestamp without time zone NOT NULL DEFAULT now(),
-        updated_at timestamp without time zone NOT NULL DEFAULT now()
-    );
-     
-    CREATE TRIGGER set_timestamp
-    BEFORE UPDATE ON remember_tokens
-    FOR EACH ROW
-    EXECUTE PROCEDURE trigger_set_timestamp();
-     
-    drop table if exists tokens;
-     
-    CREATE TABLE tokens (
-        id SERIAL PRIMARY KEY,
-        user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        first_name character varying(255) NOT NULL,
-        email character varying(255) NOT NULL,
-        token character varying(255) NOT NULL,
-        token_hash bytea NOT NULL,
-        created_at timestamp without time zone NOT NULL DEFAULT now(),
-        updated_at timestamp without time zone NOT NULL DEFAULT now(),
-        expiry timestamp without time zone NOT NULL
-    );
-     
-    CREATE TRIGGER set_timestamp
-    BEFORE UPDATE ON tokens
-    FOR EACH ROW
-    EXECUTE PROCEDURE trigger_set_timestamp();
-       `
+	CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+drop table if exists users cascade;
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    first_name character varying(255) NOT NULL,
+    last_name character varying(255) NOT NULL,
+    user_active integer NOT NULL DEFAULT 0,
+    email character varying(255) NOT NULL UNIQUE,
+    password character varying(60) NOT NULL,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    updated_at timestamp without time zone NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+drop table if exists remember_tokens;
+
+CREATE TABLE remember_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    remember_token character varying(100) NOT NULL,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    updated_at timestamp without time zone NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON remember_tokens
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+drop table if exists tokens;
+
+CREATE TABLE tokens (
+    id SERIAL PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    first_name character varying(255) NOT NULL,
+    email character varying(255) NOT NULL,
+    token character varying(255) NOT NULL,
+    token_hash bytea NOT NULL,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+    expiry timestamp without time zone NOT NULL
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON tokens
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+	`
 
 	_, err := db.Exec(stmt)
 	if err != nil {
 		return err
 	}
-
-	log.Println("[createTable] => (END, returning nil)")
 	return nil
 }
-
-/////////////////////////////////////////////////////////////////////
-// TEST USERS TABLE FUNCTIONALITY
-/////////////////////////////////////////////////////////////////////
 
 func TestUser_Table(t *testing.T) {
 	s := models.Users.Table()
 	if s != "users" {
-		t.Error("wrong table name returned (expected 'users'): ", s)
+		t.Error("wrong table name returned: ", s)
 	}
 }
 
@@ -214,7 +195,7 @@ func TestUser_Insert(t *testing.T) {
 }
 
 func TestUser_Get(t *testing.T) {
-	u, err := models.Users.GetByID(1)
+	u, err := models.Users.Get(1)
 	if err != nil {
 		t.Error("failed to get user: ", err)
 	}
@@ -243,7 +224,7 @@ func TestUser_GetByEmail(t *testing.T) {
 }
 
 func TestUser_Update(t *testing.T) {
-	u, err := models.Users.GetByID(1)
+	u, err := models.Users.Get(1)
 	if err != nil {
 		t.Error("failed to get user: ", err)
 	}
@@ -254,7 +235,7 @@ func TestUser_Update(t *testing.T) {
 		t.Error("failed to update user: ", err)
 	}
 
-	u, err = models.Users.GetByID(1)
+	u, err = models.Users.Get(1)
 	if err != nil {
 		t.Error("failed to get user: ", err)
 	}
@@ -265,27 +246,27 @@ func TestUser_Update(t *testing.T) {
 }
 
 func TestUser_PasswordMatches(t *testing.T) {
-	u, err := models.Users.GetByID(1)
+	u, err := models.Users.Get(1)
 	if err != nil {
-		t.Error("[password matches] => user with an ID of 1 was not found: ", err)
+		t.Error("failed to get user: ", err)
 	}
 
 	matches, err := u.PasswordMatches("password")
 	if err != nil {
-		t.Error("[password matches] => error encountered when calling user.PasswordMatches: ", err)
+		t.Error("error checking match: ", err)
 	}
 
 	if !matches {
-		t.Error("password doesn't match when it should.")
+		t.Error("password does match when it should")
 	}
 
 	matches, err = u.PasswordMatches("123")
 	if err != nil {
-		t.Error("[password matches] => error encountered when calling user.PasswordMatches: ", err)
+		t.Error("error checking match: ", err)
 	}
 
-	if !matches {
-		t.Error("password matches when it should not.")
+	if matches {
+		t.Error("password matches when it should not")
 	}
 }
 
@@ -304,52 +285,48 @@ func TestUser_ResetPassword(t *testing.T) {
 func TestUser_Delete(t *testing.T) {
 	err := models.Users.Delete(1)
 	if err != nil {
-		t.Error("failed to delete user: ", err)
+		t.Error("failed to delete user: " , err)
 	}
 
-	_, err = models.Users.GetByID(1)
+	_, err = models.Users.Get(1)
 	if err == nil {
 		t.Error("retrieved user who was supposed to be deleted")
 	}
 }
 
-/////////////////////////////////////////////////////////////////////
-// TEST USERS TABLE FUNCTIONALITY
-/////////////////////////////////////////////////////////////////////
-
 func TestToken_Table(t *testing.T) {
 	s := models.Tokens.Table()
 	if s != "tokens" {
-		t.Error("wrong table returned (expected 'tokens')")
+		t.Error("wrong table name returned for tokens")
 	}
 }
 
 func TestToken_GenerateToken(t *testing.T) {
 	id, err := models.Users.Insert(dummyUser)
 	if err != nil {
-		t.Error("[TestToken_GenerateToken] => error inserting dummyUser: ", err)
+		t.Error("error inserting user: ", err)
 	}
 
 	_, err = models.Tokens.GenerateToken(id, time.Hour*24*365)
 	if err != nil {
-		t.Error("[TestToken_GenerateToken] => error generating token: ", err)
+		t.Error("error generating token: ", err)
 	}
 }
 
 func TestToken_Insert(t *testing.T) {
 	u, err := models.Users.GetByEmail(dummyUser.Email)
 	if err != nil {
-		t.Error("[TestToken_Insert] => error getting user by email (dummyUser.Email): ", err)
+		t.Error("failed to get user")
 	}
 
 	token, err := models.Tokens.GenerateToken(u.ID, time.Hour*24*365)
 	if err != nil {
-		t.Error("[TestToken_Insert] => error generating token: ", err)
+		t.Error("error generating token: ", err)
 	}
 
 	err = models.Tokens.Insert(*token, *u)
 	if err != nil {
-		t.Error("[TestToken_Insert] => error inserting token in table: ", err)
+		t.Error("error insering token: ", err)
 	}
 }
 
@@ -357,28 +334,28 @@ func TestToken_GetUserForToken(t *testing.T) {
 	token := "abc"
 	_, err := models.Tokens.GetUserForToken(token)
 	if err == nil {
-		t.Error("[TestToken_GetUserForToken ] => error expected but not received when getting user with a bad token.")
+		t.Error("error expected but not recieved when getting user with a bad token")
 	}
 
 	u, err := models.Users.GetByEmail(dummyUser.Email)
 	if err != nil {
-		t.Error("[TestToken_GetUserForToken] => error getting user by email (dummyUser.Email): ", err)
+		t.Error("failed to get user")
 	}
 
 	_, err = models.Tokens.GetUserForToken(u.Token.PlainText)
 	if err != nil {
-		t.Error("[TestToken_GetUserForToken] => failed to get user with a valid token")
+		t.Error("failed to get user with valid token: ", err)
 	}
 }
 
 func TestToken_GetTokensForUser(t *testing.T) {
 	tokens, err := models.Tokens.GetTokensForUser(1)
 	if err != nil {
-		t.Error("[TestToken_GetTokensForUser] => failed to get tokens for user")
+		t.Error(err)
 	}
 
 	if len(tokens) > 0 {
-		t.Error("[TestToken_GetTokensForUser] => tokens returned for non-existent user")
+		t.Error("tokens returned for non-existent user")
 	}
 }
 
@@ -411,20 +388,17 @@ func TestToken_GetByToken(t *testing.T) {
 	}
 }
 
-/////////////////////////////////////////////////////////////////////
-// TEST AUTHENTICATE TOKEN FUNCTIONALITY
-/////////////////////////////////////////////////////////////////////
 var authData = []struct {
-	name          string
-	token         string
-	email         string
+	name string
+	token string
+	email string
 	errorExpected bool
-	message       string
+	message string
 }{
-	{"invalid", "abcdefghijklmnopqrstuvwxyz", "junk@junk.com", true, "invalid token accepted as valid"},
-	{"invalid_length", "abcdefghijklmnopqrstuvwxyz12345", "junk@junk.com", true, "invalid token length accepted as valid"},
-	{"no_user", "abcdefghijklmnopqrstuvwxyz", "junk@junk.com", true, "user not found but token accepted as valid"},
-	{"valid", "", "me@here.com", false, "valid token accepted as invalid"},
+	{"invalid", "abcdefghijklmnopqrstuvwxyz", "a@here.com", true, "invalid token accepted as valid"},
+	{"invalid_length", "abcdefghijklmnopqrstuvwxy", "a@here.com", true, "token of wrong length token accepted as valid"},
+	{"no_user", "abcdefghijklmnopqrstuvwxyz", "a@here.com", true, "no user, but token accepted as valid"},
+	{"valid", "", "me@here.com", false, "valid token reported as invalid"},
 }
 
 func TestToken_AuthenticateToken(t *testing.T) {
@@ -441,7 +415,7 @@ func TestToken_AuthenticateToken(t *testing.T) {
 		}
 
 		req, _ := http.NewRequest("GET", "/", nil)
-		req.Header.Add("Authorization", "Bearer "+token)
+		req.Header.Add("Authorization", "Bearer " + token)
 
 		_, err := models.Tokens.AuthenticateToken(req)
 		if tt.errorExpected && err == nil {
@@ -460,6 +434,7 @@ func TestToken_Delete(t *testing.T) {
 		t.Error(err)
 	}
 
+
 	err = models.Tokens.DeleteByToken(u.Token.PlainText)
 	if err != nil {
 		t.Error("error deleting token: ", err)
@@ -467,6 +442,7 @@ func TestToken_Delete(t *testing.T) {
 }
 
 func TestToken_ExpiredToken(t *testing.T) {
+	// insert a token
 	u, err := models.Users.GetByEmail(dummyUser.Email)
 	if err != nil {
 		t.Error(err)
@@ -483,12 +459,13 @@ func TestToken_ExpiredToken(t *testing.T) {
 	}
 
 	req, _ := http.NewRequest("GET", "/", nil)
-	req.Header.Add("Authorization", "Bearer "+token.PlainText)
+	req.Header.Add("Authorization", "Bearer " + token.PlainText)
 
 	_, err = models.Tokens.AuthenticateToken(req)
 	if err == nil {
 		t.Error("failed to catch expired token")
 	}
+
 }
 
 func TestToken_BadHeader(t *testing.T) {
@@ -499,18 +476,18 @@ func TestToken_BadHeader(t *testing.T) {
 	}
 
 	req, _ = http.NewRequest("GET", "/", nil)
-	req.Header.Add("Autorization", "abc")
+	req.Header.Add("Authorization", "abc")
 	_, err = models.Tokens.AuthenticateToken(req)
 	if err == nil {
 		t.Error("failed to catch bad auth header")
 	}
 
-	newUser := User{
+	newUser := User {
 		FirstName: "temp",
-		LastName:  "temp_last",
-		Email:     "you@there.com",
-		Active:    1,
-		Password:  "abc",
+		LastName: "temp_last",
+		Email: "you@there.com",
+		Active: 1,
+		Password: "abc",
 	}
 
 	id, err := models.Users.Insert(newUser)
@@ -534,11 +511,12 @@ func TestToken_BadHeader(t *testing.T) {
 	}
 
 	req, _ = http.NewRequest("GET", "/", nil)
-	req.Header.Add("Autorization", "Bearer "+token.PlainText)
+	req.Header.Add("Authorization", "Bearer " + token.PlainText)
 	_, err = models.Tokens.AuthenticateToken(req)
 	if err == nil {
 		t.Error("failed to catch token for deleted user")
 	}
+
 }
 
 func TestToken_DeleteNonExistentToken(t *testing.T) {
@@ -572,7 +550,7 @@ func TestToken_ValidToken(t *testing.T) {
 		t.Error("valid token reported as invalid")
 	}
 
-	okay, err = models.Tokens.ValidToken("abc")
+	okay, _ = models.Tokens.ValidToken("abc")
 	if okay {
 		t.Error("invalid token reported as valid")
 	}
