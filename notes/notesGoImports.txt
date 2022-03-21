@@ -23,6 +23,9 @@ $ go get -u github.com/ory/dockertest/v3/docker
 $ go get github.com/ory/dockertest/v3
 $ go get github.com/ory/dockertest/v3/docker
 
+$ cd celeritas
+$ go get github.com/fatih/color
+
 
 
 
