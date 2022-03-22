@@ -2,6 +2,7 @@ package celeritas
 
 import (
 	"log"
+	"path/filepath"
 
 	"github.com/golang-migrate/migrate/v4"
 
@@ -12,7 +13,8 @@ import (
 )
 
 func (c *Celeritas) MigrateUp(dsn string) error {
-	m, err := migrate.New("file://"+c.RootPath+"/migrations", dsn)
+	rootPath := filepath.ToSlash(c.RootPath)
+	m, err := migrate.New("file://"+rootPath+"/migrations", dsn)
 	if err != nil {
 		return err
 	}
@@ -26,8 +28,9 @@ func (c *Celeritas) MigrateUp(dsn string) error {
 	return nil
 }
 
-func (c *Celeritas) MigrateDown(dsn string) error {
-	m, err := migrate.New("file://"+c.RootPath+"/migrations", dsn)
+func (c *Celeritas) MigrateDownAll(dsn string) error {
+	rootPath := filepath.ToSlash(c.RootPath)
+	m, err := migrate.New("file://"+rootPath+"/migrations", dsn)
 	if err != nil {
 		return err
 	}
@@ -42,7 +45,8 @@ func (c *Celeritas) MigrateDown(dsn string) error {
 }
 
 func (c *Celeritas) Steps(n int, dsn string) error {
-	m, err := migrate.New("file://"+c.RootPath+"/migrations", dsn)
+	rootPath := filepath.ToSlash(c.RootPath)
+	m, err := migrate.New("file://"+rootPath+"/migrations", dsn)
 	if err != nil {
 		return err
 	}
@@ -57,14 +61,16 @@ func (c *Celeritas) Steps(n int, dsn string) error {
 }
 
 func (c *Celeritas) MigrateForce(dsn string) error {
-	m, err := migrate.New("file://"+c.RootPath+"/migrations", dsn)
+	rootPath := filepath.ToSlash(c.RootPath)
+	m, err := migrate.New("file://"+rootPath+"/migrations", dsn)
 	if err != nil {
 		return err
 	}
 	defer m.Close()
 
 	if err := m.Force(-1); err != nil {
-
+		log.Println("[migrate.MigrateForce] => (error): ", err)
+		return err
 	}
 
 	if err := m.Force(-1); err != nil {
