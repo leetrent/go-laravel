@@ -1,0 +1,7 @@
+$ cd celeritas
+$ make build_cli
+
+$ cd myapp
+$ docker-compose up
+$ ./celeritas make migration
+$ ./celeritas migrate up

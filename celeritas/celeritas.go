@@ -96,7 +96,7 @@ func (c *Celeritas) New(rootPath string) error {
 	// CONNECT TO DATABASE
 	//////////////////////////////////////////////////////////
 	if os.Getenv("DATABASE_TYPE") != "" {
-		db, err := c.OpenDB(os.Getenv("DATABASE_TYPE"), c.BuildSDN())
+		db, err := c.OpenDB(os.Getenv("DATABASE_TYPE"), c.BuildDSN())
 		if err != nil {
 			c.ErrorLog.Println(err)
 			os.Exit(1)
@@ -138,7 +138,7 @@ func (c *Celeritas) New(rootPath string) error {
 		sessionType: os.Getenv("SESSION_TYPE"),
 		database: databaseConfig{
 			database: os.Getenv("DATABASE_TYPE"),
-			dsn:      c.BuildSDN(),
+			dsn:      c.BuildDSN(),
 		},
 	}
 
@@ -241,7 +241,7 @@ func (c *Celeritas) createRenderer() {
 	c.Render = &myRenderer
 }
 
-func (c *Celeritas) BuildSDN() string {
+func (c *Celeritas) BuildDSN() string {
 	var dsn string
 
 	//databaseType := os.Getenv("DATABASE_TYPE")
