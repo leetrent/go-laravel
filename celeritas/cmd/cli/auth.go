@@ -25,7 +25,7 @@ func doAuth() error {
 		exitGracefully(err)
 	}
 
-	err = copyDataToFile([]byte("drop table if exists users cascade"), downFile)
+	err = copyDataToFile([]byte("drop table if exists users cascade; drop table if exists tokens cascade; drop table if exists remember_tokens;"), downFile)
 	if err != nil {
 		exitGracefully(err)
 	}
@@ -41,5 +41,14 @@ func doAuth() error {
 	////////////////////////////////////////////////////////////////////////
 	// COPY FILES
 	////////////////////////////////////////////////////////////////////////
+	err = copyFileFromTemplate("templates/data/user.go.txt", cel.RootPath+"/data/user.go")
+	if err != nil {
+		exitGracefully(err)
+	}
+	err = copyFileFromTemplate("templates/data/token.go.txt", cel.RootPath+"/data/token.go")
+	if err != nil {
+		exitGracefully(err)
+	}
+
 	return nil
 }
