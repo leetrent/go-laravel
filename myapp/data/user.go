@@ -67,7 +67,7 @@ func (u *User) GetByEmail(email string) (*User, error) {
 }
 
 // Get gets one user by id
-func (u *User) Get(id int) (*User, error) {
+func (u *User) GetByID(id int) (*User, error) {
 	var theUser User
 	collection := upper.Collection(u.Table())
 	res := collection.Find(up.Cond{"id =": id})
@@ -145,7 +145,7 @@ func (u *User) ResetPassword(id int, password string) error {
 		return err
 	}
 
-	theUser, err := u.Get(id)
+	theUser, err := u.GetByID(id)
 	if err != nil {
 		return err
 	}
