@@ -154,6 +154,7 @@ func (c *Celeritas) New(rootPath string) error {
 		CookieName:     c.config.cookie.name,
 		SessionType:    c.config.sessionType,
 		CookieDomain:   c.config.cookie.domain,
+		DBPool:         c.DB.Pool,
 	}
 	c.Session = httpSession.InitSession()
 
