@@ -4,6 +4,7 @@ import (
 	"log"
 	"myapp/data"
 	"myapp/handlers"
+	"myapp/middleware"
 	"os"
 
 	"github.com/leetrent/celeritas"
@@ -24,6 +25,10 @@ func initApplication() *application {
 
 	cel.AppName = "myapp"
 
+	myMiddleware := &middleware.Middleware{
+		App: cel,
+	}
+
 	// cel.InfoLog.Println("AppName is set to:", cel.AppName)
 	// cel.InfoLog.Println("Version is set to:", cel.Version)
 	// cel.InfoLog.Println("Debug is set to..:", cel.Debug)
@@ -33,14 +38,16 @@ func initApplication() *application {
 	}
 
 	app := &application{
-		App:      cel,
-		Handlers: myHandlers,
+		App:        cel,
+		Handlers:   myHandlers,
+		Middleware: myMiddleware,
 	}
 
 	app.App.Routes = app.routes()
 
 	app.Models = data.New(app.App.DB.Pool)
 	myHandlers.Models = app.Models
+	app.Middleware.Models = app.Models
 
 	return app
 }
