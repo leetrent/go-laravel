@@ -26,7 +26,7 @@ func (a *application) routes() *chi.Mux {
 	a.App.Routes.Get("/users/logout", a.Handlers.UserLogout)
 
 	a.App.Routes.Get("/form", a.Handlers.Form)
-	//a.App.Routes.Post("/form", a.Handlers.PostForm)
+	a.App.Routes.Post("/form", a.Handlers.PostForm)
 
 	//////////////////////////////////////////
 	// TEST DATABASE
