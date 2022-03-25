@@ -117,12 +117,15 @@ func (a *application) routes() *chi.Mux {
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		// TEST VALIDATOR
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		// validator := a.App.Validator(nil)
-		// validator.Check(len(u.LastName) > 20, "last_name", "Last name must be 20 characters or more")
-		// if !validator.Valid() {
-		// 	fmt.Fprint(w, "failed validation")
-		// 	return
-		// }
+		validator := a.App.Validator(nil)
+		//validator.Check(len(u.LastName) > 20, "last_name", "Last name must be 20 characters or more")
+
+		u.LastName = ""
+		u.Validate(validator)
+		if !validator.Valid() {
+			fmt.Fprint(w, "failed validation")
+			return
+		}
 		/////////////////////////////////////////////////////////////////////////////////////////////
 
 		err = u.Update(*u)

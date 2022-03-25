@@ -4,6 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/leetrent/celeritas"
+
 	up "github.com/upper/db/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -24,6 +26,13 @@ type User struct {
 // Table returns the table name associated with this model in the database
 func (u *User) Table() string {
 	return "users"
+}
+
+func (u *User) Validate(validator *celeritas.Validation) {
+	validator.Check(u.LastName != "", "last_name", "Last name must be provided")
+	validator.Check(u.FirstName != "", "first_name", "First name must be provided")
+	validator.Check(u.Email != "", "email", "Email address must be provided")
+	validator.IsEmail("email", u.Email)
 }
 
 // GetAll returns a slice of all users
