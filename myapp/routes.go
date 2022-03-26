@@ -28,6 +28,13 @@ func (a *application) routes() *chi.Mux {
 	a.App.Routes.Get("/form", a.Handlers.Form)
 	a.App.Routes.Post("/form", a.Handlers.PostForm)
 
+	///////////////////////////////////////////////
+	// TEST JSON, XML, File Download functionality
+	///////////////////////////////////////////////
+	a.get("/json", a.Handlers.JSON)
+	a.get("/xml", a.Handlers.XML)
+	a.get("/download-file", a.Handlers.DownloadFile)
+
 	//////////////////////////////////////////
 	// TEST DATABASE
 	//////////////////////////////////////////
