@@ -165,8 +165,8 @@ func (c *Celeritas) New(rootPath string) error {
 	//////////////////////////////////////////////////////////
 	// READ ENCRYPTION KEY FROM .env FILE
 	//////////////////////////////////////////////////////////
-	//c.EncryptionKey = os.Getenv("KEY")
-	c.EncryptionKey = "7zllP1TbvJv99l1xRJfHVtxff7ZfdX9d"
+	c.EncryptionKey = os.Getenv("KEY")
+	//c.EncryptionKey = "7zllP1TbvJv99l1xRJfHVtxff7ZfdX9d"
 	fmt.Println("")
 	fmt.Printf("c.EncryptionKey.......: '%s'", c.EncryptionKey)
 	fmt.Printf("\nlen(c.EncryptionKey): '%d'", len(c.EncryptionKey))
