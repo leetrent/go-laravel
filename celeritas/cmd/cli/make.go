@@ -17,6 +17,7 @@ func doMake(arg2, arg3 string) error {
 	case "key":
 		rnd := cel.RandomString(32)
 		color.Yellow("32 character encryption key: '%s'", rnd)
+		fmt.Println("len(rnd):", len(rnd))
 	case "migration":
 		dbType := cel.DB.DataType
 		if arg3 == "" {

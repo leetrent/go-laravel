@@ -19,18 +19,19 @@ import (
 const version = "1.0.0"
 
 type Celeritas struct {
-	AppName  string
-	Debug    bool
-	Version  string
-	ErrorLog *log.Logger
-	InfoLog  *log.Logger
-	RootPath string
-	Routes   *chi.Mux
-	Render   *render.Render
-	Session  *scs.SessionManager
-	DB       Database
-	JetViews *jet.Set
-	config   config
+	AppName       string
+	Debug         bool
+	Version       string
+	ErrorLog      *log.Logger
+	InfoLog       *log.Logger
+	RootPath      string
+	Routes        *chi.Mux
+	Render        *render.Render
+	Session       *scs.SessionManager
+	DB            Database
+	JetViews      *jet.Set
+	config        config
+	EncryptionKey string
 }
 
 type config struct {
@@ -42,13 +43,14 @@ type config struct {
 }
 
 func (c *Celeritas) New(rootPath string) error {
-	//logSnippet := "\n[celeritas][New] =>"
-	//fmt.Printf("%s (rootPath): %s\n", logSnippet, rootPath)
+	logSnippet := "\n[celeritas][New] =>"
+	fmt.Printf("%s (rootPath)..: %s\n", logSnippet, rootPath)
 
 	//////////////////////////////////////////////////////////
 	// ASSIGN APPLICATION ROOT PATH
 	//////////////////////////////////////////////////////////
 	c.RootPath = rootPath
+	fmt.Printf("%s (c.RootPath): %s\n", logSnippet, c.RootPath)
 
 	//////////////////////////////////////////////////////////
 	// ASSIGN APPLICATION VERSION
@@ -80,10 +82,12 @@ func (c *Celeritas) New(rootPath string) error {
 	// Read contents of .env file and create an
 	// environment variable for each entry in .env file
 	//////////////////////////////////////////////////////////
-	err = godotenv.Load(rootPath + "/.env")
+	//err = godotenv.Load(rootPath + "/.env")
+	err = godotenv.Load(rootPath + "\\.env")
 	if err != nil {
 		return err
 	}
+	fmt.Printf("%s (rootPath+\"\\.env\"): %s\n", logSnippet, rootPath+"\\.env")
 
 	//////////////////////////////////////////////////////////
 	// CREATE LOGGERS
@@ -158,6 +162,16 @@ func (c *Celeritas) New(rootPath string) error {
 	}
 	c.Session = httpSession.InitSession()
 
+	//////////////////////////////////////////////////////////
+	// READ ENCRYPTION KEY FROM .env FILE
+	//////////////////////////////////////////////////////////
+	//c.EncryptionKey = os.Getenv("KEY")
+	c.EncryptionKey = "7zllP1TbvJv99l1xRJfHVtxff7ZfdX9d"
+	fmt.Println("")
+	fmt.Printf("c.EncryptionKey.......: '%s'", c.EncryptionKey)
+	fmt.Printf("\nlen(c.EncryptionKey): '%d'", len(c.EncryptionKey))
+	fmt.Println("")
+
 	/////////////////////////////////////////////////////
 	// ASSIGN AVAILABLE ROUTES
 	//////////////////////////////////////////////////////////
@@ -181,6 +195,9 @@ func (c *Celeritas) New(rootPath string) error {
 }
 
 func (c *Celeritas) Init(p initPaths) error {
+	logSnippet := "\n[celeritas][Init] =>"
+	fmt.Printf("%s (p.rootPath)..: %s\n", logSnippet, p.rootPath)
+
 	root := p.rootPath
 	for _, path := range p.folderNames {
 		err := c.CreateDirIfNotExist(root + "/" + path)
@@ -193,6 +210,9 @@ func (c *Celeritas) Init(p initPaths) error {
 }
 
 func (c *Celeritas) checkDotEnv(path string) error {
+	logSnippet := "\n[celeritas][checkDotEnv] =>"
+	fmt.Printf("%s (path)..: %s\n", logSnippet, path)
+
 	err := c.CreateFileIfNotExists(fmt.Sprintf("%s/.env", path))
 	if err != nil {
 		return err
