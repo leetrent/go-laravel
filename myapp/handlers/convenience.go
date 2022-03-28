@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+
+	"github.com/leetrent/celeritas"
 )
 
 func (h *Handlers) render(w http.ResponseWriter, r *http.Request, tmpl string, variables, data interface{}) error {
@@ -35,4 +38,33 @@ func (h *Handlers) sessionDestroy(ctx context.Context) error {
 
 func (h *Handlers) randomString(n int) string {
 	return h.App.RandomString(n)
+}
+
+func (h *Handlers) encrypt(text string) (string, error) {
+	enc := celeritas.Encryption{Key: []byte(h.App.EncryptionKey)}
+
+	fmt.Printf("\ntext....................: '%s'", text)
+	fmt.Printf("\nh.App.EncryptionKey.....: '%s'", h.App.EncryptionKey)
+	fmt.Printf("\nenc.Key.................: '%s'", enc.Key)
+	fmt.Printf("\nlen(h.App.EncryptionKey): '%d'", len(h.App.EncryptionKey))
+	fmt.Printf("\nlen(enc.Key)............: '%d'", len(enc.Key))
+
+	encrypted, err := enc.Encrypt(text)
+	if err != nil {
+		h.App.ErrorLog.Println(err)
+		return "", err
+	}
+
+	return encrypted, nil
+}
+
+func (h *Handlers) decrypt(crypto string) (string, error) {
+	enc := celeritas.Encryption{Key: []byte(h.App.EncryptionKey)}
+
+	decrypted, err := enc.Decrypt(crypto)
+	if err != nil {
+		return "", err
+	}
+
+	return decrypted, nil
 }
