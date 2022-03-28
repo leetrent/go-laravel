@@ -1,0 +1,6 @@
+################################################
+# Redigo is a Go client for the Redis database.
+# https://github.com/gomodule/redigo
+################################################
+$ go get github.com/gomodule/redigo/redis
+
