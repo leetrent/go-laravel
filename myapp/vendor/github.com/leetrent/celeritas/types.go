@@ -24,3 +24,9 @@ type Database struct {
 	DataType string
 	Pool     *sql.DB
 }
+
+type redisConig struct {
+	host     string
+	password string
+	prefix   string
+}
