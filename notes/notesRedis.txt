@@ -4,3 +4,10 @@
 ################################################
 $ go get github.com/gomodule/redigo/redis
 
+#################################################
+Miniredis
+Pure Go Redis test server, used in Go unit tests.
+#################################################
+$ go get github.com/alicebob/miniredis/v2
+import "github.com/alicebob/miniredis/v2"
+
