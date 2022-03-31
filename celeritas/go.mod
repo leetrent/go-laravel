@@ -7,6 +7,7 @@ require (
 	github.com/CloudyKit/jet/v6 v6.1.0 // indirect
 	github.com/alexedwards/scs/mysqlstore v0.0.0-20220216073957-c252878bcf5a // indirect
 	github.com/alexedwards/scs/postgresstore v0.0.0-20220216073957-c252878bcf5a // indirect
+	github.com/alexedwards/scs/redisstore v0.0.0-20220216073957-c252878bcf5a // indirect
 	github.com/alexedwards/scs/v2 v2.5.0 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
 	github.com/alicebob/miniredis/v2 v2.20.0 // indirect

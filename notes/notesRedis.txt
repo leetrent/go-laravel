@@ -11,3 +11,8 @@ Pure Go Redis test server, used in Go unit tests.
 $ go get github.com/alicebob/miniredis/v2
 import "github.com/alicebob/miniredis/v2"
 
+#################################################
+# A Redis based session store for SCS:
+#################################################
+$ go get github.com/alexedwards/scs/redisstore
+
