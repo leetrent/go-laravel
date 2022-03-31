@@ -3,6 +3,8 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/justinas/nosurf"
 )
 
 func (h *Handlers) ShowCachePage(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +26,12 @@ func (h *Handlers) SaveInCache(w http.ResponseWriter, r *http.Request) {
 	err := h.App.ReadJSON(w, r, &userInput)
 	if err != nil {
 		h.App.ErrorLog.Println("[SaveInCache] => (ReadJSON): ", err)
+		h.App.Error500(w, r)
+		return
+	}
+
+	if !nosurf.VerifyToken(nosurf.Token(r), userInput.CSRF) {
+		h.App.ErrorLog.Println("[SaveInCache] => (nosurf.VerifyToken): ", err)
 		h.App.Error500(w, r)
 		return
 	}
@@ -60,6 +68,12 @@ func (h *Handlers) GetFromCache(w http.ResponseWriter, r *http.Request) {
 	err := h.App.ReadJSON(w, r, &userInput)
 	if err != nil {
 		h.App.ErrorLog.Println("[GetFromCache] => (ReadJSON): ", err)
+		h.App.Error500(w, r)
+		return
+	}
+
+	if !nosurf.VerifyToken(nosurf.Token(r), userInput.CSRF) {
+		h.App.ErrorLog.Println("[GetFromCache] => (nosurf.VerifyToken): ", err)
 		h.App.Error500(w, r)
 		return
 	}
@@ -109,6 +123,12 @@ func (h *Handlers) DeleteFromCache(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !nosurf.VerifyToken(nosurf.Token(r), userInput.CSRF) {
+		h.App.ErrorLog.Println("[DeleteFromCache] => (nosurf.VerifyToken): ", err)
+		h.App.Error500(w, r)
+		return
+	}
+
 	err = h.App.Cache.Forget(userInput.Name)
 	if err != nil {
 		h.App.ErrorLog.Println("[DeleteFromCache] => (Cache.Forget): ", err)
@@ -134,6 +154,12 @@ func (h *Handlers) EmptyCache(w http.ResponseWriter, r *http.Request) {
 	err := h.App.ReadJSON(w, r, &userInput)
 	if err != nil {
 		h.App.ErrorLog.Println("[EmptyCache] => (ReadJSON): ", err)
+		h.App.Error500(w, r)
+		return
+	}
+
+	if !nosurf.VerifyToken(nosurf.Token(r), userInput.CSRF) {
+		h.App.ErrorLog.Println("[EmptyCache] => (nosurf.VerifyToken): ", err)
 		h.App.Error500(w, r)
 		return
 	}

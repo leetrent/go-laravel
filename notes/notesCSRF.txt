@@ -1,0 +1,3 @@
+# nosurf is an HTTP package for Go that helps you prevent Cross-Site Request Forgery attacks. It acts like a middleware and therefore is # compatible with basically any Go HTTP application.
+$ go get github.com/justinas/nosurf
+
