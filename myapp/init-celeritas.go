@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"myapp/data"
 	"myapp/handlers"
@@ -17,10 +16,10 @@ func initApplication() *application {
 		log.Fatal(err)
 	}
 
-	logSnippet := "[myapp][init-celeritas] =>"
-	fmt.Println("")
-	fmt.Printf("%s os.Getwd(): %s", logSnippet, path)
-	fmt.Println("")
+	// logSnippet := "[myapp][init-celeritas] =>"
+	// fmt.Println("")
+	// fmt.Printf("%s os.Getwd(): %s", logSnippet, path)
+	// fmt.Println("")
 
 	// init celeritas
 	cel := &celeritas.Celeritas{}

@@ -49,14 +49,14 @@ type config struct {
 }
 
 func (c *Celeritas) New(rootPath string) error {
-	logSnippet := "\n[celeritas][New] =>"
-	fmt.Printf("%s (rootPath)..: %s\n", logSnippet, rootPath)
+	// logSnippet := "\n[celeritas][New] =>"
+	// fmt.Printf("%s (rootPath)..: %s\n", logSnippet, rootPath)
 
 	//////////////////////////////////////////////////////////
 	// ASSIGN APPLICATION ROOT PATH
 	//////////////////////////////////////////////////////////
 	c.RootPath = rootPath
-	fmt.Printf("%s (c.RootPath): %s\n", logSnippet, c.RootPath)
+	//fmt.Printf("%s (c.RootPath): %s\n", logSnippet, c.RootPath)
 
 	//////////////////////////////////////////////////////////
 	// ASSIGN APPLICATION VERSION
@@ -93,7 +93,7 @@ func (c *Celeritas) New(rootPath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s (rootPath+\"\\.env\"): %s\n", logSnippet, rootPath+"\\.env")
+	//fmt.Printf("%s (rootPath+\"\\.env\"): %s\n", logSnippet, rootPath+"\\.env")
 
 	//////////////////////////////////////////////////////////
 	// CREATE LOGGERS
@@ -194,10 +194,10 @@ func (c *Celeritas) New(rootPath string) error {
 	//////////////////////////////////////////////////////////
 	c.EncryptionKey = os.Getenv("KEY")
 	//c.EncryptionKey = "7zllP1TbvJv99l1xRJfHVtxff7ZfdX9d"
-	fmt.Println("")
-	fmt.Printf("c.EncryptionKey.......: '%s'", c.EncryptionKey)
-	fmt.Printf("\nlen(c.EncryptionKey): '%d'", len(c.EncryptionKey))
-	fmt.Println("")
+	// fmt.Println("")
+	// fmt.Printf("c.EncryptionKey.......: '%s'", c.EncryptionKey)
+	// fmt.Printf("\nlen(c.EncryptionKey): '%d'", len(c.EncryptionKey))
+	// fmt.Println("")
 
 	/////////////////////////////////////////////////////
 	// ASSIGN AVAILABLE ROUTES
@@ -209,9 +209,27 @@ func (c *Celeritas) New(rootPath string) error {
 	//////////////////////////////////////////////////////////
 	var views = jet.NewSet(
 		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
-		jet.InDevelopmentMode(),
+		//jet.InDevelopmentMode(),
 	)
 	c.JetViews = views
+
+	logSnippet := "\n[celeritas][New] =>"
+	fmt.Println("")
+	fmt.Printf("%s (c.Debug): '%t'", logSnippet, c.Debug)
+	fmt.Println("")
+
+	if c.Debug {
+		var views = jet.NewSet(
+			jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+			jet.InDevelopmentMode(),
+		)
+		c.JetViews = views
+	} else {
+		var views = jet.NewSet(
+			jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+		)
+		c.JetViews = views
+	}
 
 	//////////////////////////////////////////////////////////
 	// ASSIGN TEMPLATE RENDERER
@@ -222,8 +240,8 @@ func (c *Celeritas) New(rootPath string) error {
 }
 
 func (c *Celeritas) Init(p initPaths) error {
-	logSnippet := "\n[celeritas][Init] =>"
-	fmt.Printf("%s (p.rootPath)..: %s\n", logSnippet, p.rootPath)
+	// logSnippet := "\n[celeritas][Init] =>"
+	// fmt.Printf("%s (p.rootPath)..: %s\n", logSnippet, p.rootPath)
 
 	root := p.rootPath
 	for _, path := range p.folderNames {
@@ -237,8 +255,8 @@ func (c *Celeritas) Init(p initPaths) error {
 }
 
 func (c *Celeritas) checkDotEnv(path string) error {
-	logSnippet := "\n[celeritas][checkDotEnv] =>"
-	fmt.Printf("%s (path)..: %s\n", logSnippet, path)
+	// logSnippet := "\n[celeritas][checkDotEnv] =>"
+	// fmt.Printf("%s (path)..: %s\n", logSnippet, path)
 
 	err := c.CreateFileIfNotExists(fmt.Sprintf("%s/.env", path))
 	if err != nil {
