@@ -24,6 +24,9 @@ github.com/alexedwards/scs/mysqlstore
 # github.com/alexedwards/scs/postgresstore v0.0.0-20220216073957-c252878bcf5a
 ## explicit; go 1.12
 github.com/alexedwards/scs/postgresstore
+# github.com/alexedwards/scs/redisstore v0.0.0-20220216073957-c252878bcf5a
+## explicit; go 1.14
+github.com/alexedwards/scs/redisstore
 # github.com/alexedwards/scs/v2 v2.5.0
 ## explicit; go 1.12
 github.com/alexedwards/scs/v2
