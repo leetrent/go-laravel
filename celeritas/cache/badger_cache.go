@@ -115,6 +115,7 @@ func (b *BadgerCache) emptyByMatch(str string) error {
 		opts.AllVersions = false
 		opts.PrefetchValues = false
 		iter := txn.NewIterator(opts)
+		defer iter.Close()
 
 		keysForDelete := make([][]byte, 0, collectSize)
 		keysCollected := 0
