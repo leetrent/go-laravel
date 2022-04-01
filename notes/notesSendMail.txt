@@ -1,0 +1,20 @@
+
+#######################################################################################################################
+# Go Simple Mail
+# The best way to send emails in Go with SMTP Keep Alive and Timeout for Connect and Send.
+# https://github.com/xhit/go-simple-mail
+#######################################################################################################################
+$ go get github.com/xhit/go-simple-mail/v2
+
+#######################################################################################################################
+go-premailer
+Inline styling for HTML mail in golang
+#######################################################################################################################
+$ go get github.com/vanng822/go-premailer/premailer
+
+#######################################################################################################################
+# Go Mail aims to unify multiple popular mail APIs into a singular, easy to use interface. 
+# Email sending is seriously simple and great for allowing the developer or end user to choose what platform they use.
+# https://github.com/ainsleyclark/go-mail
+#######################################################################################################################
+$ go get github.com/ainsleyclark/go-mail@v1.0.3
