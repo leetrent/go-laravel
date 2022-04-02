@@ -10,6 +10,7 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
+// Mail holds the information necessary to connect to an SMTP server
 type Mail struct {
 	Domain      string
 	Templates   string
@@ -27,6 +28,7 @@ type Mail struct {
 	APIUrl      string
 }
 
+// Message is the type for an email message
 type Message struct {
 	From        string
 	FromName    string
@@ -37,11 +39,17 @@ type Message struct {
 	Data        interface{}
 }
 
+// Result contains information regarding the status of the sent email message
 type Result struct {
 	Success bool
 	Error   error
 }
 
+// ListenForMail listens to the mail channel and sends mail
+// when it receives a payload. It runs continually in the background,
+// and sends error/success messages back on the Results channel.
+// Note that if api and api key are set, it will prefer using
+// an api to send mail
 func (m *Mail) ListentForMail() {
 	for {
 		msg := <-m.Jobs
