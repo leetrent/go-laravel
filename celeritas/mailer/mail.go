@@ -53,9 +53,13 @@ type Result struct {
 // and sends error/success messages back on the Results channel.
 // Note that if api and api key are set, it will prefer using
 // an api to send mail
-func (m *Mail) ListentForMail() {
+func (m *Mail) ListenForMail() {
+	snippet := "[celeritas][mail.go][ListenForMail] =>"
 	for {
 		msg := <-m.Jobs
+		fmt.Println("")
+		fmt.Printf("%s (msg): %s", snippet, msg)
+		fmt.Println("")
 		err := m.Send(msg)
 		if err != nil {
 			m.Results <- Result{false, err}
@@ -66,6 +70,10 @@ func (m *Mail) ListentForMail() {
 }
 
 func (m *Mail) Send(msg Message) error {
+	fmt.Println("")
+	fmt.Println("[celeritas][mail.go][Send] =>")
+	fmt.Println("")
+
 	if len(m.API) > 0 && len(m.APIKey) > 0 && len(m.APIUrl) > 0 && m.API != "smtp" {
 		m.ChooseAPI(msg)
 	}
@@ -154,6 +162,10 @@ func (m *Mail) addAPIAttachments(msg Message, tx *apimail.Transmission) error {
 }
 
 func (m *Mail) SendSMTPMessage(msg Message) error {
+	fmt.Println("")
+	fmt.Println("[celeritas][mail.go][SendSMTPMessage] =>")
+	fmt.Println("")
+
 	formattedMessage, err := m.buildHTMLMessage(msg)
 	if err != nil {
 		return err
@@ -165,19 +177,37 @@ func (m *Mail) SendSMTPMessage(msg Message) error {
 	}
 
 	server := mail.NewSMTPClient()
-	server.Host = m.Host
+	//server.Host = m.Host
+	server.Host = "smtp.mailtrap.io"
 	server.Port = m.Port
 	server.Username = m.Username
 	server.Password = m.Password
 	server.Encryption = m.getEncryption(m.Encryption)
 	server.KeepAlive = false
-	server.ConnectTimeout = 1 * time.Second
+	server.ConnectTimeout = 10 * time.Second
 	server.SendTimeout = 10 * time.Second
+
+	logSnippet := "\n[celeritas][mail.go][SendSMTPMessage] =>"
+	fmt.Printf("%s (m.Host)...............: %s", logSnippet, m.Host)
+	fmt.Printf("%s (server.Host)..........: %s", logSnippet, server.Host)
+	fmt.Printf("%s (server.Port)..........: %d", logSnippet, server.Port)
+	fmt.Printf("%s (server.Username)......: %s", logSnippet, server.Username)
+	fmt.Printf("%s (server.Password)......: %s", logSnippet, server.Password)
+	fmt.Printf("%s (server.KeepAlive).....: %t", logSnippet, server.KeepAlive)
+	fmt.Printf("%s (server.ConnectTimeout): %v", logSnippet, server.ConnectTimeout)
+	fmt.Printf("%s (server.SendTimeout)...: %v", logSnippet, server.SendTimeout)
+
+	fmt.Println("\n[celeritas][mail.go][SendSMTPMessage] => (Calling server.Connect...)")
 
 	smptClient, err := server.Connect()
 	if err != nil {
+		fmt.Println("")
+		fmt.Printf("[celeritas][mail.go][SendSMTPMessage] => (server.Connect error): %s", err)
+		fmt.Println("")
 		return err
 	}
+
+	fmt.Println("[celeritas][mail.go][SendSMTPMessage] => (Returning from server.Connect...)")
 
 	email := mail.NewMSG()
 	email.SetFrom(msg.From).AddTo(msg.To).SetSubject(msg.Subject)
@@ -190,10 +220,16 @@ func (m *Mail) SendSMTPMessage(msg Message) error {
 		}
 	}
 
+	fmt.Println("[celeritas][mail.go][SendSMTPMessage] => (Calling email.Send...)")
 	err = email.Send(smptClient)
 	if err != nil {
+		fmt.Println("")
+		fmt.Printf("[celeritas][mail.go][SendSMTPMessage] => (email.Send error): %s", err)
+		fmt.Println("")
 		return err
 	}
+
+	fmt.Println("[celeritas][mail.go][SendSMTPMessage] => (Returning from email.Send...)")
 
 	return nil
 }

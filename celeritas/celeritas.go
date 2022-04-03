@@ -266,7 +266,7 @@ func (c *Celeritas) New(rootPath string) error {
 	// MAIL SERVICE
 	//////////////////////////////////////////////////////////
 	c.Mail = c.createMailer()
-	go c.Mail.ListentForMail()
+	go c.Mail.ListenForMail()
 
 	return nil
 }
@@ -373,6 +373,10 @@ func (c *Celeritas) createMailer() mailer.Mail {
 		APIKey:      os.Getenv("MAILER_KEY"),
 		APIUrl:      os.Getenv("MAILER_URL"),
 	}
+
+	logSnippet := "\n[celerita][celeritas.go][createMailer()] =>"
+	fmt.Printf("%s (os.Getenv(\"SMPT_HOST\"): %s)", logSnippet, os.Getenv("SMPT_HOST"))
+	fmt.Printf("%s (m.Host)...............: %s)", logSnippet, m.Host)
 	return m
 }
 

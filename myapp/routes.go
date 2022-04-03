@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/leetrent/celeritas/mailer"
+
 	"github.com/go-chi/chi/v5"
 )
 
@@ -66,6 +68,26 @@ func (a *application) routes() *chi.Mux {
 		}
 
 		fmt.Fprintf(w, "id: '%d', name='%s'", id, name)
+	})
+
+	///////////////////////////////////////////////////////////////////////////////
+	// TEST SMTP MAIL SERVICE
+	///////////////////////////////////////////////////////////////////////////////
+	a.get("/test-mail", func(w http.ResponseWriter, r *http.Request) {
+		msg := mailer.Message{
+			From:        "test@example.com",
+			To:          "you@there.com",
+			Subject:     "Test Subject - sent using channel",
+			Template:    "test",
+			Attachments: nil,
+			Data:        nil,
+		}
+		
+		a.App.Mail.Jobs <- msg
+		res := <-a.App.Mail.Results
+		if res.Error != nil {
+			a.App.ErrorLog.Println(res.Error)
+		}
 	})
 
 	///////////////////////////////////////////////////////////////////////////////
