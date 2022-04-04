@@ -82,12 +82,26 @@ func (a *application) routes() *chi.Mux {
 			Attachments: nil,
 			Data:        nil,
 		}
-		
-		a.App.Mail.Jobs <- msg
-		res := <-a.App.Mail.Results
-		if res.Error != nil {
-			a.App.ErrorLog.Println(res.Error)
+
+		///////////////////////////////////////////////////////////////////////////////
+		// SEND MAIL USING CHANNEL
+		///////////////////////////////////////////////////////////////////////////////
+		// a.App.Mail.Jobs <- msg
+		// res := <-a.App.Mail.Results
+		// if res.Error != nil {
+		// 	a.App.ErrorLog.Println(res.Error)
+		// }
+
+		///////////////////////////////////////////////////////////////////////////////
+		// SEND MAIL NOT USING CHANNEL (DIRECT CALL)
+		///////////////////////////////////////////////////////////////////////////////
+		err := a.App.Mail.SendSMTPMessage(msg)
+		if err != nil {
+			a.App.ErrorLog.Println(err)
+			return
 		}
+
+		fmt.Fprint(w, "Sent mail!")
 	})
 
 	///////////////////////////////////////////////////////////////////////////////

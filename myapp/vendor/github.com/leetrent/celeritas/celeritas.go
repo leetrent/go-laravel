@@ -103,7 +103,7 @@ func (c *Celeritas) New(rootPath string) error {
 		return err
 	}
 	//fmt.Printf("%s (rootPath+\"\\.env\"): %s\n", logSnippet, rootPath+"\\.env")
-	fmt.Printf("%s (os.Getenv(\"SMTP_HOST\"): %s)\n", logSnippet, os.Getenv("SMTP_HOST"))
+	fmt.Printf("%s (os.Getenv(\"SMTP_HOST\"): %s\n", logSnippet, os.Getenv("SMTP_HOST"))
 
 	//////////////////////////////////////////////////////////
 	// CREATE LOGGERS
