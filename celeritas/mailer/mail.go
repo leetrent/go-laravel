@@ -177,8 +177,7 @@ func (m *Mail) SendSMTPMessage(msg Message) error {
 	}
 
 	server := mail.NewSMTPClient()
-	//server.Host = m.Host
-	server.Host = "smtp.mailtrap.io"
+	server.Host = m.Host
 	server.Port = m.Port
 	server.Username = m.Username
 	server.Password = m.Password

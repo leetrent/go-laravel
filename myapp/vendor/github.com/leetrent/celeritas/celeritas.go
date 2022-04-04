@@ -57,7 +57,8 @@ type config struct {
 }
 
 func (c *Celeritas) New(rootPath string) error {
-	// logSnippet := "\n[celeritas][New] =>"
+	logSnippet := "\n[celeritas][celeritas.go][New()] =>"
+	// fmt.Printf("%s (os.Getenv(\"SMTP_HOST\"): %s)\n", logSnippet, os.Getenv("SMTP_HOST"))
 	// fmt.Printf("%s (rootPath)..: %s\n", logSnippet, rootPath)
 
 	//////////////////////////////////////////////////////////
@@ -102,6 +103,7 @@ func (c *Celeritas) New(rootPath string) error {
 		return err
 	}
 	//fmt.Printf("%s (rootPath+\"\\.env\"): %s\n", logSnippet, rootPath+"\\.env")
+	fmt.Printf("%s (os.Getenv(\"SMTP_HOST\"): %s)\n", logSnippet, os.Getenv("SMTP_HOST"))
 
 	//////////////////////////////////////////////////////////
 	// CREATE LOGGERS
@@ -239,10 +241,10 @@ func (c *Celeritas) New(rootPath string) error {
 	)
 	c.JetViews = views
 
-	logSnippet := "\n[celeritas][New] =>"
-	fmt.Println("")
-	fmt.Printf("%s (c.Debug): '%t'", logSnippet, c.Debug)
-	fmt.Println("")
+	//logSnippet := "\n[celeritas][New] =>"
+	// fmt.Println("")
+	// fmt.Printf("%s (c.Debug): '%t'", logSnippet, c.Debug)
+	// fmt.Println("")
 
 	if c.Debug {
 		var views = jet.NewSet(
@@ -360,7 +362,7 @@ func (c *Celeritas) createMailer() mailer.Mail {
 	m := mailer.Mail{
 		Domain:      os.Getenv("MAIL_DOMAIN"),
 		Templates:   c.RootPath + "/mail",
-		Host:        os.Getenv("SMPT_HOST"),
+		Host:        os.Getenv("SMTP_HOST"),
 		Port:        port,
 		Username:    os.Getenv("SMTP_USERNAME"),
 		Password:    os.Getenv("SMTP_PASSWORD"),
@@ -375,8 +377,8 @@ func (c *Celeritas) createMailer() mailer.Mail {
 	}
 
 	logSnippet := "\n[celerita][celeritas.go][createMailer()] =>"
-	fmt.Printf("%s (os.Getenv(\"SMPT_HOST\"): %s)", logSnippet, os.Getenv("SMPT_HOST"))
-	fmt.Printf("%s (m.Host)...............: %s)", logSnippet, m.Host)
+	fmt.Printf("%s (os.Getenv(\"SMTP_HOST\"): %s\n", logSnippet, os.Getenv("SMTP_HOST"))
+	fmt.Printf("%s (m.Host)...............: %s\n", logSnippet, m.Host)
 	return m
 }
 
