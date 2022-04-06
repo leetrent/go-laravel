@@ -74,10 +74,18 @@ func (a *application) routes() *chi.Mux {
 	// TEST SMTP MAIL SERVICE
 	///////////////////////////////////////////////////////////////////////////////
 	a.get("/test-mail", func(w http.ResponseWriter, r *http.Request) {
+		// msg := mailer.Message{
+		// 	From:        "test@example.com",
+		// 	To:          "you@there.com",
+		// 	Subject:     "Test Subject - sent using channel",
+		// 	Template:    "test",
+		// 	Attachments: nil,
+		// 	Data:        nil,
+		// }
 		msg := mailer.Message{
-			From:        "test@example.com",
-			To:          "you@there.com",
-			Subject:     "Test Subject - sent using channel",
+			From:        "mailgun@sandbox2cbe917537114f7d8a25a031c42732e0.mailgun.org",
+			To:          "lee.trent@icloud.com",
+			Subject:     "Test Subject - sent using an API via channel",
 			Template:    "test",
 			Attachments: nil,
 			Data:        nil,
@@ -86,20 +94,22 @@ func (a *application) routes() *chi.Mux {
 		///////////////////////////////////////////////////////////////////////////////
 		// SEND MAIL USING CHANNEL
 		///////////////////////////////////////////////////////////////////////////////
-		// a.App.Mail.Jobs <- msg
-		// res := <-a.App.Mail.Results
-		// if res.Error != nil {
-		// 	a.App.ErrorLog.Println(res.Error)
-		// }
+		a.App.Mail.Jobs <- msg
+		res := <-a.App.Mail.Results
+		if res.Error != nil {
+			a.App.ErrorLog.Println(res.Error)
+		}
+		///////////////////////////////////////////////////////////////////////////////
 
 		///////////////////////////////////////////////////////////////////////////////
 		// SEND MAIL NOT USING CHANNEL (DIRECT CALL)
 		///////////////////////////////////////////////////////////////////////////////
-		err := a.App.Mail.SendSMTPMessage(msg)
-		if err != nil {
-			a.App.ErrorLog.Println(err)
-			return
-		}
+		// err := a.App.Mail.SendSMTPMessage(msg)
+		// if err != nil {
+		// 	a.App.ErrorLog.Println(err)
+		// 	return
+		// }
+		///////////////////////////////////////////////////////////////////////////////
 
 		fmt.Fprint(w, "Sent mail!")
 	})

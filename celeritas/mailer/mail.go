@@ -70,12 +70,14 @@ func (m *Mail) ListenForMail() {
 }
 
 func (m *Mail) Send(msg Message) error {
-	fmt.Println("")
-	fmt.Println("[celeritas][mail.go][Send] =>")
+	logSnippet := "\n[celeritas][mailer][mail.go][Send] =>"
+	fmt.Printf("%s (m.API)...: %s", logSnippet, m.API)
+	fmt.Printf("%s (m.APIKey): %s", logSnippet, m.APIKey)
+	fmt.Printf("%s (m.APIUrl): %s", logSnippet, m.APIUrl)
 	fmt.Println("")
 
 	if len(m.API) > 0 && len(m.APIKey) > 0 && len(m.APIUrl) > 0 && m.API != "smtp" {
-		m.ChooseAPI(msg)
+		return m.ChooseAPI(msg)
 	}
 	return m.SendSMTPMessage(msg)
 }
@@ -90,6 +92,17 @@ func (m *Mail) ChooseAPI(msg Message) error {
 }
 
 func (m *Mail) SendUsingAPI(msg Message, transport string) error {
+
+	logSnippet := "\n[celeritas][mailer][mail.go][SendUsingAPI] =>"
+	fmt.Printf("%s (msg).........: %s", logSnippet, msg)
+	fmt.Printf("%s (transport)...: %s", logSnippet, transport)
+	fmt.Printf("%s (m.APIUrl)....: %s", logSnippet, m.APIUrl)
+	fmt.Printf("%s (m.APIKey)....: %s", logSnippet, m.APIKey)
+	fmt.Printf("%s (m.Domain)....: %s", logSnippet, m.Domain)
+	fmt.Printf("%s (msg.From)....: %s", logSnippet, msg.From)
+	fmt.Printf("%s (msg.FromName): %s", logSnippet, msg.FromName)
+	fmt.Println("")
+
 	if msg.From == "" {
 		msg.From = m.FromAddress
 	}
@@ -234,6 +247,11 @@ func (m *Mail) SendSMTPMessage(msg Message) error {
 }
 
 func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
+	logSnippet := "\n[celeritas][mailer][mail.go][buildHTMLMessage] =>"
+	fmt.Printf("%s (m.Templates).: '%s'", logSnippet, m.Templates)
+	fmt.Printf("%s (msg.Template): '%s'", logSnippet, msg.Template)
+	fmt.Println("")
+
 	templateToRender := fmt.Sprintf("%s/%s.html.tmpl", m.Templates, msg.Template)
 
 	t, err := template.New("email-html").ParseFiles(templateToRender)
