@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (m *Middleware) CheckRememebr(next http.Handler) http.Handler {
+func (m *Middleware) CheckRemember(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !m.App.Session.Exists(r.Context(), "userID") {
 			// USER IS NOT LOGGED IN

@@ -36,7 +36,11 @@
             required=""
             autocomplete="password-new">
     </div>
-    <a href="javascript:void(0)" class="btn btn-primary" onclick="val()">Login</a>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" value="remember" id="remember">
+        <label class="form-check-label" for="remember">Remember me</label>
+    </div>
+    <a href="javascript:void(0)" class="btn btn-primary mt-3" onclick="val()">Login</a>
     <p class="mt-2">
         <small><a href="/users/forgot-password">Forgot Password?</a></small>
     </p>
